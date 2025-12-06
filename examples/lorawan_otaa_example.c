@@ -9,7 +9,7 @@
 
 
 
-#include <bootloader.h>
+//#include <bootloader.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,7 +26,7 @@
 
 
 // ISR de RX UART
-#int_RDA2
+#INT_RDA2
 void RDA2_isr(void)
 {
    unsigned int8 c = fgetc(RUI3_UART);
@@ -40,6 +40,8 @@ void main(void) {
     output_low(LED2);
     rui3_event_t evt;
     rui3_status_t st;
+    enable_interrupts(INT_RDA2);
+    enable_interrupts(GLOBAL);
 
     rui3_at_init();
 
@@ -48,13 +50,17 @@ void main(void) {
     if(st != RUI3_ST_OK)
     {
        // manejar error
+        protolink_debug_msg("Error\r\n");
+        while(1);
     }
+    protolink_debug_msg("RAK3172 ok! \r\n");
+    delay_ms(100);
     
     // Config OTAA
     rui3_at_set_join_mode(RUI3_JOIN_MODE_OTAA);
-    rui3_at_set_deveui((char*)"0123456789ABCDEF");
-    rui3_at_set_appeui((char*)"0011223344556677");
-    rui3_at_set_appkey((char*)"00112233445566778899AABBCCDDEEFF");
+    rui3_at_set_deveui((char*)"ac1f09fffe1cf474");
+    rui3_at_set_appeui((char*)"162d2599a938b08f");
+    rui3_at_set_appkey((char*)"ac1f09fffe1cf474ac1f09fff9153172");
     
     
     // Disparar JOIN
@@ -62,7 +68,10 @@ void main(void) {
     if(st != RUI3_ST_OK)
     {
        // falló el comando AT+JOIN
+        protolink_debug_msg("Fallo comando Join\r\n");
+        
     }
+    
 
     // Esperar JOINED o JOIN_FAILED desde el main
     if(rui3_at_wait_event(&evt, 30000)) // 30s
@@ -70,10 +79,13 @@ void main(void) {
        if(evt.type == RUI3_EVT_JOINED)
        {
           // JOIN OK
+           protolink_debug_msg("Join OK!\r\n");
+           
        }
        else if(evt.type == RUI3_EVT_JOIN_FAILED)
        {
           // JOIN FAIL
+           protolink_debug_msg("Join fail!\r\n");
        }
     }
     else

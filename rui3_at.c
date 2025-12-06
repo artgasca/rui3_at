@@ -355,28 +355,28 @@ rui3_status_t rui3_at_set_join_mode(rui3_join_mode_t mode)
 {
    char cmd[16];
    // Según RUI3: AT+NJM=1 (OTAA), =0 (ABP)
-   sprintf(cmd, (char*)"AT+NJM=%u", (mode == RUI3_JOIN_MODE_OTAA) ? 1 : 0);
+   sprintf(cmd,"AT+NJM=%u", (mode == RUI3_JOIN_MODE_OTAA) ? 1 : 0);
    return rui3_at_cmd(cmd, NULL, 0, RUI3_AT_CMD_TIMEOUT_MS);
 }
 
 rui3_status_t rui3_at_set_deveui(char *deveui16)
 {
    char cmd[40];
-   sprintf(cmd, (char*)"AT+DEVEUI=%s", deveui16);
+   sprintf(cmd,"AT+DEVEUI=%s", deveui16);
    return rui3_at_cmd(cmd, NULL, 0, RUI3_AT_CMD_TIMEOUT_MS);
 }
 
 rui3_status_t rui3_at_set_appeui(char *appeui16)
 {
    char cmd[40];
-   sprintf(cmd, (char*)"AT+APPEUI=%s", appeui16);
+   sprintf(cmd, "AT+APPEUI=%s", appeui16);
    return rui3_at_cmd(cmd, NULL, 0, RUI3_AT_CMD_TIMEOUT_MS);
 }
 
 rui3_status_t rui3_at_set_appkey(char *appkey32)
 {
    char cmd[64];
-   sprintf(cmd, (char*)"AT+APPKEY=%s", appkey32);
+   sprintf(cmd,"AT+APPKEY=%s", appkey32);
    return rui3_at_cmd(cmd, NULL, 0, RUI3_AT_CMD_TIMEOUT_MS);
 }
 
@@ -391,7 +391,7 @@ rui3_status_t rui3_at_send_uplink_start(unsigned int8 fport,
                                         char *payload_hex)
 {
    char cmd[96];
-   sprintf(cmd, (char*)"AT+SEND=%u:%s", fport, payload_hex);
+   sprintf(cmd,"AT+SEND=%u:%s", fport, payload_hex);
    return rui3_at_cmd(cmd, NULL, 0, RUI3_AT_CMD_TIMEOUT_MS);
 }
 
