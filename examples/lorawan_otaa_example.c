@@ -16,9 +16,8 @@
 #include <stdlib.h>
 #define FW_VERSION "1.0.0"
 // UART hacia módulo RUI3 (RAK3172, 4630, etc.)
-#use rs232(UART2, baud=115200, stream=RUI3_UART, ERRORS)
-
-#define RUI3_AT_STREAM   RUI3_UART
+#define RUI3_AT_BAUD    115200
+#define RUI3_AT_STREAM   RUI3_INT_UART2
 #define RUI3_AT_DEBUG    1
 #include "../rui3_at.h"
 #include "../rui3_at.c"
@@ -46,14 +45,14 @@ int1 lastFlag = 0;
 
 #define UPLINK_TIME 20
 int16 uplink_time_count = 0;
-
-// ISR de RX UART
-#INT_RDA2
-void RDA2_isr(void)
-{
-   unsigned int8 c = fgetc(RUI3_UART);
-   rui3_at_uart_rx_isr(c);
-}
+//
+//// ISR de RX UART
+//#INT_RDA2
+//void RDA2_isr(void)
+//{
+//   unsigned int8 c = fgetc(RUI3_UART);
+//   rui3_at_uart_rx_isr(c);
+//}
 
 
 #INT_TIMER0
@@ -94,7 +93,7 @@ void main(void) {
     {
        // manejar error
         protolink_debug_msg("Error\r\n");
-        while(1);
+        //while(1);
     }
     protolink_debug_msg("RAK3172 ok! \r\n");
     delay_ms(100);
