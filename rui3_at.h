@@ -7,12 +7,18 @@
 // -----------------------------------------------------------------------------
 // Configuración
 // -----------------------------------------------------------------------------
-
+#define RUI3_INT_UART1         7777
+#define RUI3_INT_UART2        6666
+#define RUI3_INT_UART3        5555
+#define RUI3_INT_UART4        4444
+#define RUI3_INT_UART5        3333
 // Stream de CCS para el UART conectado al módulo RUI3
 #ifndef RUI3_AT_STREAM
-   #define RUI3_AT_STREAM   RUI3_UART
+   #define RUI3_AT_STREAM   RUI3_INT_UART1
 #endif
-
+#ifndef RUI3_AT_BAUD
+    #define RUI3_AT_BAUD 115200
+#endif
 // Tamaños de buffers
 #ifndef RUI3_AT_RX_RING_SIZE
    #define RUI3_AT_RX_RING_SIZE   256
