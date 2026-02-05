@@ -4,7 +4,7 @@
  *
  * Created on 06 de Diciembre de 2025, 10:32 AM
  */
-
+#define PROTOLINK_DEFAULT true
 #include "v1.h"
 
 
@@ -16,75 +16,28 @@
 #include <stdlib.h>
 #define FW_VERSION "1.0.0"
 // UART hacia módulo RUI3 (RAK3172, 4630, etc.)
-#use rs232(UART2, baud=115200, stream=RUI3_UART, ERRORS)
-
-#define RUI3_AT_STREAM   RUI3_UART
+#define RUI3_AT_BAUD    115200
+#define RUI3_AT_STREAM   RUI3_INT_UART2
 #define RUI3_AT_DEBUG    1
 #include "../rui3_at.h"
 #include "../rui3_at.c"
-#include "v2.h"
 
-
-/* Protolink Default functions
- * Active define for use in main
- * Interrupts use for counters INT0, INT1
- * SMT1 and SMT use for counters
- * Timer0 config for 1 second, consume in protolink_one_second()
- */
-// Numero de interrupciones de TIMER0 para ~1 segundo
-// 0.013s * 77 ? 1001 ms
-int16 NInts = 77;
-
-// VARIABLES GLOBALES
-int16 C_Ints = 0;   // Contador de interrupciones ocurridas
-int1 Flag = 0;     // Flag que cambia cada ~1 segundo
-
-// Ejemplo de uso: hacer algo cada vez que cambie Flag (~1s)
-int1 lastFlag = 0;
 
 
 
 #define UPLINK_TIME 20
 int16 uplink_time_count = 0;
 
-// ISR de RX UART
-#INT_RDA2
-void RDA2_isr(void)
-{
-   unsigned int8 c = fgetc(RUI3_UART);
-   rui3_at_uart_rx_isr(c);
-}
 
-
-#INT_TIMER0
-void TIMER0_isr(void)
-{
-    C_Ints++;
-    if(C_Ints >= NInts){
-        C_Ints = 0;
-        Flag = !Flag; //Toggle cada 1s
-    }
-    clear_interrupt(INT_TIMER0);
-}
-
-int1 protolink_one_second(void){
-    if(Flag != lastFlag){
-        lastFlag = flag;
-        return true;
-    }
-    return false;
-}
 void main(void) {
     delay_ms(100);
     protolink_io_init();
+    protolink_timer0_init();
     output_low(LED1);
     output_low(LED2);
     rui3_event_t evt;
     rui3_status_t st;
-    setup_timer_0(T0_INTERNAL | T0_DIV_256 | T0_8_BIT);
-    enable_interrupts(INT_TIMER0);
-    enable_interrupts(INT_RDA2);
-    enable_interrupts(GLOBAL);
+    
 
     rui3_at_init();
 
@@ -94,18 +47,18 @@ void main(void) {
     {
        // manejar error
         protolink_debug_msg("Error\r\n");
-        while(1);
+        //while(1);
     }
     protolink_debug_msg("RAK3172 ok! \r\n");
     delay_ms(100);
     
     // Config OTAA
-    rui3_at_set_join_mode(RUI3_JOIN_MODE_OTAA);
+    /*rui3_at_set_join_mode(RUI3_JOIN_MODE_OTAA);
     rui3_at_set_deveui((char*)"ac1f09fffe1cf474");
     rui3_at_set_appeui((char*)"162d2599a938b08f");
     rui3_at_set_appkey((char*)"ac1f09fffe1cf474ac1f09fff9153172");
     
-    
+   */ 
     // Disparar JOIN
     st = rui3_at_join_start();
     if(st != RUI3_ST_OK)
@@ -165,6 +118,8 @@ void main(void) {
                st = rui3_at_send_uplink_start(1,(char*)"AABBCC");
                if(st != RUI3_ST_OK){
                    protolink_debug_msg("Algo fallo en el envio\r\n");
+               }else{
+                   protolink_debug_msg("Envio exitoso\r\n");
                }
 
             }

@@ -1,9 +1,43 @@
-// rui3_at.c - Driver genérico AT para módulos RUI3 (RAKwireless)
+// rui3_at.c - Driver genÃ©rico AT para mÃ³dulos RUI3 (RAKwireless)
 // Compatible con CCS C Compiler
 
 #include <string.h>
 #include "rui3_at.h"
 
+// UART por hardware
+
+#if (RUI3_AT_STREAM == RUI3_INT_UART1 )
+    #use rs232(baud=RUI3_AT_BAUD, UART1, stream=RUI3_UART, errors)
+#elif (RUI3_AT_STREAM == RUI3_INT_UART2 )
+    #use rs232(baud=RUI3_AT_BAUD, UART2, stream=RUI3_UART, errors)
+#elif (RUI3_AT_STREAM == RUI3_INT_UART3 )
+    #use rs232(baud=RUI3_AT_BAUD, UART3, stream=RUI3_UART, errors)
+#elif (RUI3_AT_STREAM == RUI3_INT_UART4 )
+    #use rs232(baud=RUI3_AT_BAUD, UART4, stream=RUI3_UART, errors)
+#elif (RUI3_AT_STREAM == RUI3_INT_UART5 )
+    #use rs232(baud=RUI3_AT_BAUD, UART5, stream=RUI3_UART, errors)
+#endif
+
+
+
+// ISR de RX UART
+//// ISR de recepciÃ³n
+#if (RUI3_AT_STREAM==RUI3_INT_UART1)
+#int_rda
+#elif (RUI3_AT_STREAM==RUI3_INT_UART2)
+#int_rda2
+#elif (RUI3_AT_STREAM==RUI3_INT_UART3)
+#int_rda3
+#elif (RUI3_AT_STREAM==RUI3_INT_UART4)
+#int_rda4
+#elif (RUI3_AT_STREAM==RUI3_INT_UART5)
+#int_rda5
+#endif
+void rui3_at_isr(void)
+{
+   unsigned int8 c = fgetc(RUI3_UART);
+   rui3_at_uart_rx_isr(c);
+}
 // -----------------------------------------------------------------------------
 // Estructuras internas
 // -----------------------------------------------------------------------------
@@ -15,15 +49,15 @@ static volatile unsigned int16 rx_tail = 0;
 static char  line_buf[RUI3_AT_LINE_BUF_SIZE];
 static unsigned int8 line_len = 0;
 
-// Último status de comando
+// Ãšltimo status de comando
 static volatile rui3_status_t last_cmd_status = RUI3_ST_OK;
 static volatile int1 cmd_status_ready = 0;
 
-// Última línea de valor de respuesta (ej. DEVEUI, etc.)
+// Ãšltima lÃ­nea de valor de respuesta (ej. DEVEUI, etc.)
 static char  last_value_line[RUI3_AT_LINE_BUF_SIZE];
 static unsigned int8 last_value_len = 0;
 
-// Flag de módulo ocupado por comando (simple)
+// Flag de mÃ³dulo ocupado por comando (simple)
 static volatile int1 cmd_in_progress = 0;
 
 // -----------------------------------------------------------------------------
@@ -94,7 +128,7 @@ static void _trim_crlf(char *s)
 }
 
 // -----------------------------------------------------------------------------
-// API pública base
+// API pÃºblica base
 // -----------------------------------------------------------------------------
 
 void rui3_at_init(void)
@@ -105,6 +139,19 @@ void rui3_at_init(void)
    cmd_status_ready = 0;
    last_value_len = 0;
    cmd_in_progress = 0;
+   
+#if (RUI3_AT_STREAM==RUI3_INT_UART1)
+   enable_interrupts(INT_RDA);
+#elif (RUI3_AT_STREAM==RUI3_INT_UART2)
+    enable_interrupts(INT_RDA2);
+#elif (RUI3_AT_STREAM==RUI3_INT_UART3)
+    enable_interrupts(INT_RDA3);
+#elif (RUI3_AT_STREAM==RUI3_INT_UART4)
+    enable_interrupts(INT_RDA4);
+#elif (RUI3_AT_STREAM==RUI3_INT_UART5)
+    enable_interrupts(INT_RDA5);;
+#endif
+   enable_interrupts(GLOBAL);
 }
 
 // Llamar desde ISR del UART
@@ -113,7 +160,7 @@ void rui3_at_uart_rx_isr(unsigned int8 c)
    _rx_ring_push(c);
 }
 
-// Procesa el ring, arma líneas y genera eventos/comandos
+// Procesa el ring, arma lÃ­neas y genera eventos/comandos
 int1 rui3_at_task(rui3_event_t *evt)
 {
    unsigned int8 c;
@@ -126,7 +173,7 @@ int1 rui3_at_task(rui3_event_t *evt)
 
       if(c == '\n')
       {
-         // fin de línea
+         // fin de lÃ­nea
          line_buf[line_len] = '\0';
          _trim_crlf(line_buf);
 
@@ -147,7 +194,7 @@ int1 rui3_at_task(rui3_event_t *evt)
             cmd_status_ready = 1;
             cmd_in_progress = 0;
          }
-         // Eventos asíncronos (+EVT:...)
+         // Eventos asÃ­ncronos (+EVT:...)
          else if(!strncmp(line_buf, (char*)"+EVT:", 5))
          {
             char *p = line_buf + 5;
@@ -242,7 +289,7 @@ int1 rui3_at_task(rui3_event_t *evt)
          }
          else
          {
-            // Línea de dato de respuesta (ej. DEVEUI=?)
+            // LÃ­nea de dato de respuesta (ej. DEVEUI=?)
             last_value_len = strlen(line_buf);
             if(last_value_len >= sizeof(last_value_line))
                last_value_len = sizeof(last_value_line)-1;
@@ -274,13 +321,13 @@ static void _rui3_at_send_line(char *s)
    char *p = s;
    while(*p)
    {
-      fputc(*p++, RUI3_AT_STREAM);
+      fputc(*p++, RUI3_UART);
    }
-   fputc('\r', RUI3_AT_STREAM);
-   fputc('\n', RUI3_AT_STREAM);
+   fputc('\r', RUI3_UART);
+   fputc('\n', RUI3_UART);
 }
 
-// Comando genérico bloqueante (solo a nivel de status AT)
+// Comando genÃ©rico bloqueante (solo a nivel de status AT)
 // Usa delay_ms(1) internamente, sin get_ticks.
 rui3_status_t rui3_at_cmd(char *cmd_no_crlf,
                           char *value_buf,
@@ -354,7 +401,7 @@ int1 rui3_at_wait_event(rui3_event_t *evt, unsigned int16 timeout_ms)
 rui3_status_t rui3_at_set_join_mode(rui3_join_mode_t mode)
 {
    char cmd[16];
-   // Según RUI3: AT+NJM=1 (OTAA), =0 (ABP)
+   // SegÃºn RUI3: AT+NJM=1 (OTAA), =0 (ABP)
    sprintf(cmd,"AT+NJM=%u", (mode == RUI3_JOIN_MODE_OTAA) ? 1 : 0);
    return rui3_at_cmd(cmd, NULL, 0, RUI3_AT_CMD_TIMEOUT_MS);
 }
