@@ -139,6 +139,19 @@ void rui3_at_init(void)
    cmd_status_ready = 0;
    last_value_len = 0;
    cmd_in_progress = 0;
+   
+#if (RUI3_AT_STREAM==RUI3_INT_UART1)
+   enable_interrupts(INT_RDA);
+#elif (RUI3_AT_STREAM==RUI3_INT_UART2)
+    enable_interrupts(INT_RDA2);
+#elif (RUI3_AT_STREAM==RUI3_INT_UART3)
+    enable_interrupts(INT_RDA3);
+#elif (RUI3_AT_STREAM==RUI3_INT_UART4)
+    enable_interrupts(INT_RDA4);
+#elif (RUI3_AT_STREAM==RUI3_INT_UART5)
+    enable_interrupts(INT_RDA5);;
+#endif
+   enable_interrupts(GLOBAL);
 }
 
 // Llamar desde ISR del UART
