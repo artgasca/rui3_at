@@ -53,12 +53,12 @@ void main(void) {
     delay_ms(100);
     
     // Config OTAA
-    rui3_at_set_join_mode(RUI3_JOIN_MODE_OTAA);
+    /*rui3_at_set_join_mode(RUI3_JOIN_MODE_OTAA);
     rui3_at_set_deveui((char*)"ac1f09fffe1cf474");
     rui3_at_set_appeui((char*)"162d2599a938b08f");
     rui3_at_set_appkey((char*)"ac1f09fffe1cf474ac1f09fff9153172");
     
-    
+   */ 
     // Disparar JOIN
     st = rui3_at_join_start();
     if(st != RUI3_ST_OK)
