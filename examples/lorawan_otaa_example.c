@@ -118,6 +118,8 @@ void main(void) {
                st = rui3_at_send_uplink_start(1,(char*)"AABBCC");
                if(st != RUI3_ST_OK){
                    protolink_debug_msg("Algo fallo en el envio\r\n");
+               }else{
+                   protolink_debug_msg("Envio exitoso\r\n");
                }
 
             }
