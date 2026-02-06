@@ -137,7 +137,24 @@ rui3_status_t rui3_at_set_join_mode(rui3_join_mode_t mode);
 rui3_status_t rui3_at_set_deveui(char *deveui16);
 rui3_status_t rui3_at_set_appeui(char *appeui16);
 rui3_status_t rui3_at_set_appkey(char *appkey32);
+// -----------------------------------------------------------------------------
+// LoRaWAN Regional / Channels / DataRate
+// -----------------------------------------------------------------------------
 
+rui3_status_t rui3_at_set_dr(unsigned int8 dr);
+
+// Channel mask (solo aplica en US915/AU915/LA915/CN470)
+rui3_status_t rui3_at_set_mask(char *mask4_hex);
+
+// 8-channel mode enable/disable (solo aplica en US915/AU915/LA915/CN470)
+rui3_status_t rui3_at_set_che(unsigned int8 enable);
+
+// Single channel frequency (solo aplica en US915/AU915/CN470)
+// Frecuencia en Hz, ej: 902300000
+rui3_status_t rui3_at_set_chs(unsigned int32 freq_hz);
+
+// Banda/Región (si quieres seleccionar región con AT+BAND)
+rui3_status_t rui3_at_set_band(unsigned int8 band_id);
 // Dispara JOIN (envía AT+JOIN y solo espera status del comando)
 rui3_status_t rui3_at_join_start(void);
 
