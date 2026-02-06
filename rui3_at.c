@@ -446,3 +446,46 @@ rui3_status_t rui3_at_ping(unsigned int16 timeout_ms)
 {
    return rui3_at_cmd((char*)"AT", NULL, 0, timeout_ms);
 }
+
+rui3_status_t rui3_at_set_dr(unsigned int8 dr)
+{
+   char cmd[16];
+   // AT+DR=<0..7>
+   sprintf(cmd, "AT+DR=%u", dr);
+   return rui3_at_cmd(cmd, NULL, 0, RUI3_AT_CMD_TIMEOUT_MS);
+}
+rui3_status_t rui3_at_set_mask(char *mask4_hex)
+{
+   char cmd[32];
+   // AT+MASK=<4 hex>, ej "0002"
+   sprintf(cmd, "AT+MASK=%s", mask4_hex);
+   return rui3_at_cmd(cmd, NULL, 0, RUI3_AT_CMD_TIMEOUT_MS);
+}
+rui3_status_t rui3_at_set_che(unsigned int8 enable)
+{
+   char cmd[16];
+   // AT+CHE=<0|1>
+   sprintf(cmd, "AT+CHE=%u", (enable ? 1 : 0));
+   return rui3_at_cmd(cmd, NULL, 0, RUI3_AT_CMD_TIMEOUT_MS);
+}
+rui3_status_t rui3_at_set_chs(unsigned int32 freq_hz)
+{
+   char cmd[24];
+   // AT+CHS=<frequency>, ej 902300000
+   // OJO: CHS sobreescribe MASK/CHE según manual.
+   sprintf(cmd, "AT+CHS=%lu", (unsigned int32)freq_hz);
+   return rui3_at_cmd(cmd, NULL, 0, RUI3_AT_CMD_TIMEOUT_MS);
+}
+
+rui3_status_t rui3_at_set_band(unsigned int8 band_id)
+{
+   char cmd[16];
+   // AT+BAND=<id> (depende del firmware/region soportada)
+   sprintf(cmd, "AT+BAND=%u", band_id);
+   return rui3_at_cmd(cmd, NULL, 0, RUI3_AT_CMD_TIMEOUT_MS);
+}
+rui3_status_t rui3_at_reset(void)
+{
+   // AT+RESET
+   return rui3_at_cmd((char*)"AT+RESET", NULL, 0, RUI3_AT_CMD_TIMEOUT_MS);
+}
