@@ -164,5 +164,5 @@ rui3_status_t rui3_at_send_uplink_start(unsigned int8 fport,
 
 // Test básico de comunicación: manda "AT"
 rui3_status_t rui3_at_ping(unsigned int16 timeout_ms);
-
+#include "rui3_at.c"
 #endif // __RUI3_AT_H__
