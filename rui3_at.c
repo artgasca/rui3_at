@@ -2,6 +2,7 @@
 // Compatible con CCS C Compiler
 
 #include <string.h>
+#include <stdlib.h>
 #include "rui3_at.h"
 
 // UART por hardware
@@ -472,7 +473,7 @@ rui3_status_t rui3_at_set_chs(unsigned int32 freq_hz)
 {
    char cmd[24];
    // AT+CHS=<frequency>, ej 902300000
-   // OJO: CHS sobreescribe MASK/CHE según manual.
+   // OJO: CHS sobreescribe MASK/CHE segï¿½n manual.
    sprintf(cmd, "AT+CHS=%lu", (unsigned int32)freq_hz);
    return rui3_at_cmd(cmd, NULL, 0, RUI3_AT_CMD_TIMEOUT_MS);
 }
